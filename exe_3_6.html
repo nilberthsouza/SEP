@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Resistência de Condutores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            margin: 0 auto;
+            max-width: 600px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label, select, input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e2e2e2;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Cálculo de Resistência de Condutores</h1>
+    <div class="container">
+        <label for="dataOption">Você deseja usar os dados do exemplo ou inserir novos dados?</label>
+        <select id="dataOption">
+            <option value="1">Manter Dados</option>
+            <option value="2">Entrar com Novos Dados</option>
+        </select>
+
+        <div id="inputFields">
+            <!-- Fields will be dynamically added here based on data option -->
+        </div>
+
+        <button onclick="calcularResistencia()">Calcular</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function showInputFields() {
+            const dataOption = document.getElementById("dataOption").value;
+            const inputFields = document.getElementById("inputFields");
+            inputFields.innerHTML = ''; // Clear previous inputs
+
+            if (dataOption === "1") {
+                // Exemplo de dados predefinidos
+                inputFields.innerHTML = `
+                    <p>Dados predefinidos serão usados.</p>
+                `;
+            } else if (dataOption === "2") {
+                // Entrar com novos dados
+                inputFields.innerHTML = `
+                    <label for="condutor">Qual tipo de condutor?</label>
+                    <select id="condutor">
+                        <option value="1">Cobre</option>
+                        <option value="2">Alumínio</option>
+                    </select>
+
+                    <label for="area">Área do condutor (cmil):</label>
+                    <input type="number" id="area" required />
+
+                    <label for="R_ca50">Resistência CA a 50ºC por milha:</label>
+                    <input type="number" id="R_ca50" required />
+                `;
+            }
+        }
+
+        document.getElementById("dataOption").addEventListener("change", showInputFields);
+
+        function calcularResistencia() {
+            const dataOption = document.getElementById("dataOption").value;
+            let p, l = 1000, area, R_ca50, T;
+
+            if (dataOption === "1") {
+                // Dados predefinidos
+                p = 17;  // Resistividade
+                area = 1113 * 1e3; // Área Cmil
+                R_ca50 = 0.0956;   // Resistência CA 50
+                T = 228;  // Temperatura
+            } else if (dataOption === "2") {
+                // Dados do usuário
+                const condutor = document.getElementById("condutor").value;
+                area = parseFloat(document.getElementById("area").value);
+                R_ca50 = parseFloat(document.getElementById("R_ca50").value);
+
+                if (condutor === "1") {
+                    p = 10.66;  // Cobre
+                    T = 234.5;  // Cobre com 100% de condutividade
+                } else if (condutor === "2") {
+                    p = 17;  // Alumínio
+                    T = 228;  // Alumínio com 61% de condutividade
+                }
+            }
+
+            const R_zero = ((p * l) / area) * 1.02;
+            const R_cc50 = R_zero * ((T + 50) / (T + 20));
+
+            const resultado = `
+                Para 20ºC CC a resistência é: ${R_zero.toFixed(2)} ohms por 1000 pés<br>
+                Para 50ºC CC a resistência é: ${R_cc50.toFixed(2)} ohms por 1000 pés<br>
+                A relação entre a resistência CA e CC é: ${(R_ca50 / (R_cc50 * 5.280)).toFixed(2)}
+            `;
+
+            document.getElementById("result").innerHTML = resultado;
+        }
+
+        // Mostrar os campos de entrada ao carregar a página
+        showInputFields();
+    </script>
+
+</body>
+</html>
